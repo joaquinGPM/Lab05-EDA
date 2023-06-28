@@ -1,3 +1,6 @@
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
 class AVLTree<T extends Comparable<T>> {
     Nodo<T> raiz;
 
@@ -161,7 +164,89 @@ class AVLTree<T extends Comparable<T>> {
     //remove()
 
 
- 
+    // Eliminar un nodo del árbol AVL
+    Nodo<T> eliminarNodo(Nodo<T> raiz, T valor) {
+        // Realizar la eliminación en un árbol binario de búsqueda
+        if (raiz == null)
+            return raiz;
+        //Se busca el nodo a eliminar usando el metodo compareTo, 
+        //Segun Geeksforgeeks.org los resultados que puede devolver este metodo son:
+        //if string1 > string2, it returns positive number
+        //if string1 < string2, it returns negative number
+        //if string1 == string2, it returns 0
+        
+        if (valor.compareTo(raiz.valor) < 0)
+            raiz.izquierdo = eliminarNodo(raiz.izquierdo, valor);
+        else if (valor.compareTo(raiz.valor) > 0)
+            raiz.derecho = eliminarNodo(raiz.derecho, valor);
+        else {
+            // Nodo encontrado, realizar la eliminación
+
+            // Caso 1 Nodo con uno o ningún hijo
+            if ((raiz.izquierdo == null) || (raiz.derecho == null)) {
+                Nodo<T> temp;               //nodo temporal
+                if (raiz.izquierdo != null)
+                    temp = raiz.izquierdo;
+                else
+                    temp = raiz.derecho;
+
+                // Caso de ningún hijo
+                if (temp == null) {
+                    temp = raiz;
+                    raiz = null;    //eliminando el nodo
+                } else { // Caso de un hijo
+                    raiz = temp;
+                    raiz.padre = temp.padre;//Reemplazando al padre por el hijo
+                }
+                temp = null;
+            } else {
+                // Caso 2: Nodo con dos hijos
+                Nodo<T> sucesor = getNodoMin(raiz.derecho);//creando nodo sucesor
+
+                // Copiar los valores del sucesor al nodo actual
+                raiz.valor = sucesor.valor;
+
+                // Eliminar el sucesor
+                raiz.derecho = eliminarNodo(raiz.derecho, sucesor.valor);
+                       }
+                }
+
+                // Si el árbol tenía solo un nodo, no se necesita hacer más nada
+                if (raiz == null)
+                return raiz;
+
+        // Actualizar la altura del nodo actual
+        raiz.altura =  alturaMax(getAltura(raiz.izquierdo), getAltura(raiz.derecho)) +1;
+
+        // Obtener el factor de equilibrio del nodo actual
+        int factorEquilibrio = obtenerFactorEquilibrio(raiz);
+
+        // Caso de rotación izquierda-izquierda
+        if (factorEquilibrio > 1 && obtenerFactorEquilibrio(raiz.izquierdo) >= 0)
+            return rotacionDerecha(raiz);
+
+        // Caso de rotación izquierda-derecha
+        if (factorEquilibrio > 1 && obtenerFactorEquilibrio(raiz.izquierdo) < 0) {
+            raiz.izquierdo = rotacionIzquierda(raiz.izquierdo);
+            return rotacionDerecha(raiz);
+        }
+
+        // Caso de rotación derecha-derecha
+        if (factorEquilibrio < -1 && obtenerFactorEquilibrio(raiz.derecho) <= 0)
+            return rotacionIzquierda(raiz);
+
+        // Caso de rotación derecha-izquierda
+        if (factorEquilibrio < -1 && obtenerFactorEquilibrio(raiz.derecho) > 0) {
+            raiz.derecho = rotacionDerecha(raiz.derecho);
+            return rotacionIzquierda(raiz);
+        }
+
+        return raiz;
+    }
+
+     void remove(T valor) {
+        raiz = eliminarNodo(raiz, valor);
+    }
 
 
     //Metodos Auxiliares
@@ -235,5 +320,25 @@ class AVLTree<T extends Comparable<T>> {
         return y;
     }
 
+
+        //Imprimir en consola
+     public void imprimirArbol() {
+        imprimirEnOrden(raiz);
+        System.out.println();
+    }
+
+    private void imprimirEnOrden(Nodo<T> nodo) {
+        if (nodo != null) {
+            
+            imprimirEnOrden(nodo.izquierdo);
+            int valornum = (int)nodo.valor;
+            char valorchar = (char)valornum;
+            System.out.print(valorchar + " ");
+            imprimirEnOrden(nodo.derecho);
+        }
+    }
+
+
 }
+
 
